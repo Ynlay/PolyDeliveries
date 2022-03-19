@@ -69,6 +69,8 @@ public class NPC : MonoBehaviour
             anim.Play("Shoved");
             timeWaited = 0;
             waiting = true;
+            FindObjectOfType<MenuManager>().ReceiveHit();
+            FindObjectOfType<Timer>().ReduceTime(20);
         }
     }
 }
