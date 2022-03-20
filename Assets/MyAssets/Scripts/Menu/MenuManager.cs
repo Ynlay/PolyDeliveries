@@ -6,8 +6,12 @@ using UnityEngine.UI;
 
 public class MenuManager : MonoBehaviour
 {
+    [Header("UI")]
     public GameObject menu;
     public TextMeshProUGUI uiMenu;
+    public TextMeshProUGUI uiScore;
+    public GameObject mainMenu;
+    private int score;
 
     [Header("Menu options")]
     public Food[] foodOptions;
@@ -23,16 +27,20 @@ public class MenuManager : MonoBehaviour
     public AudioClip getHit;
     private AudioSource source;
 
+
     // Start is called before the first frame update
     void Start()
     {
         menu.SetActive(false);
+        mainMenu.SetActive(false);
         deliveries = new List<Order>();
         source = GetComponent<AudioSource>();
 
         foreach(Transform t in waypointOptions) {
             t.gameObject.SetActive(false);
         }
+
+        score = 0;
     }
 
     // Update is called once per frame
@@ -45,7 +53,8 @@ public class MenuManager : MonoBehaviour
             menu.SetActive(false);
         }
         if (Input.GetKeyDown(KeyCode.Escape)) {
-            Application.Quit();
+            mainMenu.SetActive(true);
+            Time.timeScale = 0;
         }
     }
 
@@ -81,6 +90,8 @@ public class MenuManager : MonoBehaviour
         if (index > 0) {
             uiMenu.text = "MENU";
             index--;
+            score += deliveries[index].GetFoodHealth();
+            uiScore.text = "Score: " + score.ToString();
             deliveries.RemoveAt(index);
             if (index > 0) {
                 deliveries[index-1].GetWaypoint().gameObject.SetActive(true);
@@ -108,4 +119,10 @@ public class MenuManager : MonoBehaviour
         source.clip = _clip;
         source.Play();
     }
+
+    public void ContinueGame() {
+        Time.timeScale = 1;
+        mainMenu.SetActive(false);
+    }
+
 }

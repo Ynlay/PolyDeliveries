@@ -7,6 +7,13 @@ public class House : MonoBehaviour
     public GameObject interaction;
     private bool interacting = false;
 
+    private Animator npcAnim;
+
+    void Start()
+    {
+        npcAnim = GetComponentInChildren<Animator>();  
+        npcAnim.SetBool("Cellphone", true); 
+    }
     // Update is called once per frame
     void Update()
     {
@@ -14,7 +21,8 @@ public class House : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.E)) {
                 SetInteraction(false);
                 FindObjectOfType<MenuManager>().RemoveLast();
-                this.gameObject.SetActive(false);
+                Invoke("Disable", 2.0f);
+                npcAnim.Play("Victory");
             }
         }
     }
@@ -36,5 +44,9 @@ public class House : MonoBehaviour
     public void SetInteraction(bool toggle) {
         interacting = toggle;
         interaction.SetActive(toggle);
+    }
+
+    public void Disable() {
+        this.gameObject.SetActive(false);
     }
 }

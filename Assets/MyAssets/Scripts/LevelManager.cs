@@ -18,7 +18,13 @@ public class LevelManager : MonoBehaviour
     }
 
     public void RestartScene() {
+        Time.timeScale = 1;
         print("Loading: " + SceneManager.GetActiveScene().name);
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    public void ExitGame() {
+        Time.timeScale = 1;
+        Application.Quit();
     }
 }

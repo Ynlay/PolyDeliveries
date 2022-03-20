@@ -14,6 +14,8 @@ public class NPC : MonoBehaviour
     [Header("NPC Info")]
     public float speed = 2.0f;
     public bool moving;
+    public bool cellphone;
+    public bool talking;
     public Transform[] waypoint;
 
 
@@ -22,6 +24,15 @@ public class NPC : MonoBehaviour
     void Start()
     {
         anim = GetComponent<Animator>();    
+
+        if (cellphone) {
+            anim.SetBool("Cellphone", true);
+        }
+
+        if (talking) {
+            anim.SetBool("Talking", true);
+        }
+        
     }
 
     // Update is called once per frame
@@ -39,7 +50,6 @@ public class NPC : MonoBehaviour
                     waiting = true;
                 }
             }
-            
 
             // Move towards waypoint!
             if (!waiting) {
@@ -48,7 +58,6 @@ public class NPC : MonoBehaviour
                 transform.position = Vector3.MoveTowards(transform.position, waypoint[index].position, step);
             }
             
-
             // Check if NPC has reached the waypoint!
             if (Vector3.Distance(transform.position, waypoint[index].position) < 1f) {
                 if (index < waypoint.Length-1) {
@@ -57,10 +66,15 @@ public class NPC : MonoBehaviour
                     index = 0;
                 }
             }
-        } else {
+        }
+
+        if (cellphone) {
+            anim.SetBool("Cellphone", true);
+        }
+
+        if (talking) {
             anim.SetBool("Talking", true);
         }
-        
     }
 
     void OnTriggerEnter(Collider other)
