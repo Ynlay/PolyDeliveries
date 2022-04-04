@@ -9,6 +9,8 @@ public class House : MonoBehaviour
 
     private Animator npcAnim;
 
+    private Order order;
+
     void Start()
     {
         npcAnim = GetComponentInChildren<Animator>();  
@@ -20,7 +22,8 @@ public class House : MonoBehaviour
         if (interacting) {
             if (Input.GetKeyDown(KeyCode.E)) {
                 SetInteraction(false);
-                FindObjectOfType<MenuManager>().RemoveLast();
+                FindObjectOfType<MenuManager>().RemoveOrder(order);
+                order = null;
                 Invoke("Disable", 2.0f);
                 npcAnim.Play("Victory");
             }
@@ -48,5 +51,9 @@ public class House : MonoBehaviour
 
     public void Disable() {
         this.gameObject.SetActive(false);
+    }
+
+    public void SetOrder(Order _order) {
+        order = _order;
     }
 }

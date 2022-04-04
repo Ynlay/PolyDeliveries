@@ -31,4 +31,9 @@ public class Order : MonoBehaviour
     public void DamageFood() {
         delivery.health--;
     }
+
+    public void SetNewOrder(Order newOrder) {
+        delivery = newOrder.GetFood();
+        waypoint = newOrder.GetWaypoint();
+    }
 }

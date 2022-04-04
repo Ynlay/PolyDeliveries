@@ -15,11 +15,13 @@ public class MenuManager : MonoBehaviour
 
     [Header("Menu options")]
     public Food[] foodOptions;
+    public int maxOrders = 6;
+
     [Header("Waypoints")]
     public Transform[] waypointOptions;
     private int lastWaypoint;
-    private int index;
-    private List<Order> deliveries;
+    private int counter;
+    private Order[] deliveries;
 
     [Header("Sound")]
     public AudioClip receive;
@@ -33,9 +35,9 @@ public class MenuManager : MonoBehaviour
     {
         menu.SetActive(false);
         mainMenu.SetActive(false);
-        deliveries = new List<Order>();
+        deliveries = new Order[maxOrders];
         source = GetComponent<AudioSource>();
-
+        ResetMenu();
         foreach(Transform t in waypointOptions) {
             t.gameObject.SetActive(false);
         }
@@ -58,60 +60,88 @@ public class MenuManager : MonoBehaviour
         }
     }
 
+    public void ResetMenu() {
+        Order reset = new Order(new Food("Empty", 0), waypointOptions[0]);
+        for (int i=0; i<maxOrders; i++) {
+            deliveries[i] = reset;
+        }
+        UpdateMenu();
+    }
+
+    public void ResetAt(int index) {
+        Order reset = new Order(new Food("Empty", 0), waypointOptions[0]);
+        deliveries[index] = reset;
+        UpdateMenu();
+    }
+
     public void AddRandom() {
-        if (index < 3) {
+        if (counter < maxOrders) {
             int randomFood = Random.Range(0, foodOptions.Length);
             int randomWaypoint = Random.Range(0, waypointOptions.Length);
-
-            while (randomWaypoint == lastWaypoint) {
+            
+            // Make sure the last waypoint is not the same as the new one
+            while (waypointOptions[randomWaypoint].gameObject.activeSelf) {
                 randomWaypoint = Random.Range(0, waypointOptions.Length);
             }
 
+            // Create new order
             Order newOrder = new Order(foodOptions[randomFood], waypointOptions[randomWaypoint]);
-
-            uiMenu.text += "\n" + foodOptions[randomFood].foodName;
-
+            for (int i=0; i<maxOrders; i++) {
+                if (deliveries[i].GetFoodName() == "Empty") {
+                    deliveries[i] = newOrder;
+                    break;
+                }
+            }
+            // Activate new waypoint && Set Order 
             waypointOptions[randomWaypoint].gameObject.SetActive(true);
-            if (index > 0 && lastWaypoint!=randomWaypoint) {
-                waypointOptions[lastWaypoint].gameObject.SetActive(false);
-            }   
+            waypointOptions[randomWaypoint].GetComponent<House>().SetOrder(newOrder);
 
-            deliveries.Add(newOrder);
-            index++;
+            counter++;
 
             lastWaypoint = randomWaypoint;
-
-            FindObjectOfType<Timer>().AddTime(10);
+            
+            UpdateMenu();
             PlayAudioClip(receive);
         }
     }
 
-    public void RemoveLast() {
-        if (index > 0) {
-            uiMenu.text = "MENU";
-            index--;
-            score += deliveries[index].GetFoodHealth();
-            uiScore.text = "Score: " + score.ToString();
-            deliveries.RemoveAt(index);
-            if (index > 0) {
-                deliveries[index-1].GetWaypoint().gameObject.SetActive(true);
-            }
-            foreach(Order order in deliveries) {
-                uiMenu.text += "\n" + order.GetFoodName();
-            }
+    // Removes the specified order from the list
+    public void RemoveOrder(Order _order) {
+        if (counter > 0) {
+            counter--;
+            score += _order.GetFoodHealth();
 
-            FindObjectOfType<Timer>().AddTime(20);
+            // Find order in our list
+            for (int i=0; i<maxOrders; i++) {
+                // Found
+                if (_order.GetFoodName() == deliveries[i].GetFoodName()) {
+                    ResetAt(i);
+                    break;
+                }
+            }
+            UpdateMenu();
+            FindObjectOfType<Timer>().AddTime(10);
             PlayAudioClip(remove);
+        }
+    }
+
+    public void UpdateMenu() {
+        uiMenu.text = "MENU";
+        uiScore.text = "Score: " + score.ToString();
+        foreach(Order order in deliveries) {
+            uiMenu.text += "\n" + order.GetFoodName() + " " + order.GetFoodHealth();
         }
     }
 
     public void ReceiveHit() {
         PlayAudioClip(getHit);
-        foreach(Order order in deliveries) {
-            if (order.GetFoodHealth() > 0) {
-                order.DamageFood();
+        for (int i=0; i<maxOrders; i++) {
+            if (deliveries[i].GetFoodHealth() > 0) {
+                deliveries[i].DamageFood();
             }
         }
+
+        UpdateMenu();
     }
 
     public void PlayAudioClip(AudioClip _clip) {
