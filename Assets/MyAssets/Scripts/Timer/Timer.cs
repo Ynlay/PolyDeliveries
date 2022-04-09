@@ -20,6 +20,10 @@ public class Timer : MonoBehaviour
     {
         startTime -= Time.deltaTime;
         timerUI.text = ((int)startTime).ToString();
+
+        if (startTime <= 0) {
+            FindObjectOfType<LevelManager>().RestartScene();
+        }
     }
 
     public void AddTime(float add) {

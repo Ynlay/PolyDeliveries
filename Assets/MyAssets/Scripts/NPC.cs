@@ -84,7 +84,6 @@ public class NPC : MonoBehaviour
             timeWaited = 0;
             waiting = true;
             FindObjectOfType<MenuManager>().ReceiveHit();
-            FindObjectOfType<Timer>().ReduceTime(20);
         }
     }
 }

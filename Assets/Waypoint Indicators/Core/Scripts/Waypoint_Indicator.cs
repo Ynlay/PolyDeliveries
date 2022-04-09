@@ -566,7 +566,7 @@ public class Waypoint_Indicator : MonoBehaviour
 
                 if (textDescription == "")
                 {
-                    textDescription = gameObject.name;
+                    textDescription = gameObject.GetComponent<House>().deliveryName;
                     //Debug.Log("There's no text");
                 }
 
