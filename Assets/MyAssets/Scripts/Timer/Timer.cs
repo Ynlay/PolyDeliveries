@@ -9,12 +9,6 @@ public class Timer : MonoBehaviour
     public TextMeshProUGUI timerUI;
     public float startTime = 500;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
     // Update is called once per frame
     void Update()
     {
@@ -22,7 +16,7 @@ public class Timer : MonoBehaviour
         timerUI.text = ((int)startTime).ToString();
 
         if (startTime <= 0) {
-            FindObjectOfType<LevelManager>().RestartScene();
+            FindObjectOfType<MenuManager>().ForceOver("Out of time!");
         }
     }
 

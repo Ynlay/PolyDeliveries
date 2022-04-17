@@ -24,12 +24,17 @@ public class House : MonoBehaviour
         if (interacting) {
             if (Input.GetKeyDown(KeyCode.E)) {
                 SetInteraction(false);
-                FindObjectOfType<MenuManager>().RemoveOrder(order);
-                order = null;
-                Invoke("Disable", 2.0f);
+                TriggerOrderRemoval();
                 npcAnim.Play("Victory");
+                PlayerStats.CompleteOrders++;
             }
         }
+    }
+
+    public void TriggerOrderRemoval() {
+        FindObjectOfType<MenuManager>().RemoveOrder(order);
+        order = null;
+        Invoke("Disable", 2.0f);
     }
 
     void OnTriggerEnter(Collider other)

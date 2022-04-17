@@ -349,7 +349,7 @@ namespace CMF
                     //Call events;
                     OnGroundContactLost();
                     OnJumpStart();
-
+					FindObjectOfType<MenuManager>().ReceiveHit();
                     currentControllerState = ControllerState.Jumping;
                 }
             }

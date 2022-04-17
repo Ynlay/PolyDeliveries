@@ -20,6 +20,10 @@ public class MenuManager : MonoBehaviour
     private int counter;
     private Order[] deliveries;
 
+    private float timer=0f;
+    private float timerToReach=10f;
+    private int faultCounter = 0;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -35,7 +39,53 @@ public class MenuManager : MonoBehaviour
         score = 0;
     }
 
+    void Update()
+    {
+        timer += Time.deltaTime;
+        if (timer >= timerToReach) {
+            for (int i=0; i<deliveries.Length; i++) {
+                if (deliveries[i].GetFoodName() != "Empty") {
+                    if (deliveries[i].GetFoodHeat() > 0) {
+                        deliveries[i].ReduceFoodHeat();
+                    } else {
+                        if (deliveries[i].GetFoodRating() > 0) {
+                            deliveries[i].ReduceFoodRating(1);
+                        } else {
+                            deliveries[i].GetWaypoint().gameObject.GetComponent<House>().TriggerOrderRemoval();
+                            Penalty();
+                        }
+                    }
+
+                   
+
+                    if (deliveries[i].GetFoodRating() > 0) {
+                        deliveries[i].ReduceFoodRating(1);
+                    } else {
+                        deliveries[i].GetWaypoint().gameObject.GetComponent<House>().TriggerOrderRemoval();
+                        Penalty();
+                    }
+                    
+                }
+            }
+
+            UpdateMenu();
+            timer = 0;
+        }
+        
+    }
+
    
+    public void Penalty() {
+        faultCounter++;
+        PlayerStats.FailedOrders = faultCounter;
+        if (faultCounter >= 3) {
+            FindObjectOfType<LevelManager>().GameOver(PlayerStats.CompleteOrders, PlayerStats.FailedOrders, score, "Too many failed orders!");
+        }
+    }
+
+    public void ForceOver(string _reason) {
+        FindObjectOfType<LevelManager>().GameOver(PlayerStats.CompleteOrders, PlayerStats.FailedOrders, score, _reason);
+    }
 
     public void ResetMenu() {
         Order reset = new Order(new Food("Empty", 0, 0, 0), waypointOptions[0].transform);
@@ -51,8 +101,9 @@ public class MenuManager : MonoBehaviour
         UpdateMenu();
     }
 
-    public void AddRandom() {
+    public void AddRandom(int ratingMinus) {
         if (counter < maxOrders) {
+            // Random Food and Waypoint
             int randomFood = Random.Range(0, foodOptions.Length);
             int randomWaypoint = Random.Range(0, waypointOptions.Length);
             
@@ -66,6 +117,8 @@ public class MenuManager : MonoBehaviour
             for (int i=0; i<maxOrders; i++) {
                 if (deliveries[i].GetFoodName() == "Empty") {
                     deliveries[i] = newOrder;
+                    deliveries[i].ResetFood();
+                    deliveries[i].ReduceFoodRating(ratingMinus);
                     foodStats[i].SetActive(true);
                     break;
                 }
@@ -85,12 +138,17 @@ public class MenuManager : MonoBehaviour
     public void RemoveOrder(Order _order) {
         if (counter > 0) {
             counter--;
-            score += _order.GetFoodRating();
+
+            if (_order.GetFoodRating() > 0) {
+                score += _order.GetFoodRating();
+            }
 
             // Find order in our list
             for (int i=0; i<maxOrders; i++) {
                 // Found
                 if (_order.GetAddress() == deliveries[i].GetAddress()) {
+                    // Reset delivery food 
+                    deliveries[i].ResetFood();
                     ResetAt(i);
                     break;
                 }
@@ -120,9 +178,21 @@ public class MenuManager : MonoBehaviour
     public void ReceiveHit() {
         SoundManager.Instance.PlayHit();
         for (int i=0; i<maxOrders; i++) {
-            if (deliveries[i].GetFoodHealth() > 0 && deliveries[i].GetFoodName() != "Empty") {
-                deliveries[i].DamageFood();
+            if (deliveries[i].GetFoodName() != "Empty") {
+                if (deliveries[i].GetFoodHealth() > 0) {
+                    deliveries[i].DamageFood();
+                }
+
+                if (deliveries[i].GetFoodHealth() <= 0) {
+                    if (deliveries[i].GetFoodRating() > 0) {
+                        deliveries[i].ReduceFoodRating(1);
+                    } else {
+                        deliveries[i].GetWaypoint().gameObject.GetComponent<House>().TriggerOrderRemoval();
+                        Penalty();
+                    }
+                }
             }
+            
         }
 
         UpdateMenu();

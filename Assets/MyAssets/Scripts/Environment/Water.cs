@@ -20,7 +20,7 @@ public class Water : MonoBehaviour
     {
         
         if (other.tag == "Player") {
-            FindObjectOfType<LevelManager>().RestartScene();
+            FindObjectOfType<MenuManager>().ForceOver("Fallen in water!");
         }
     }
 }

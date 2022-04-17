@@ -9,11 +9,20 @@ public class Restaurant : MonoBehaviour
     private bool interacting = false;
     private int ordersInQueue = 3;
 
+    private float timeWaited = 0f;
+    private float interval = 20f;
+    private int ratingMinus = 0;
+
     // Update is called once per frame
     void Update()
     {
         if (ordersInQueue > 0) {
             restaurant.SetActive(true);
+            timeWaited += Time.deltaTime;
+            if (timeWaited > interval) {
+                ratingMinus++;
+                timeWaited = 0;
+            }
         } else {
             restaurant.SetActive(false);
         }
@@ -21,11 +30,13 @@ public class Restaurant : MonoBehaviour
         if (interacting) {
             if (Input.GetKeyDown(KeyCode.E)) {
                 for (int i=0; i<ordersInQueue; i++) {
-                    FindObjectOfType<MenuManager>().AddRandom();
+                    FindObjectOfType<MenuManager>().AddRandom(ratingMinus);
                 }
                 ordersInQueue = 0;
             }
         }
+
+        
     }
 
     void OnTriggerEnter(Collider other)
